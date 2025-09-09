@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management Staff System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2a2a2a;
+            --neon-green: #82c376;
+            --neon-green-dim: #39ff1477;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --danger: #ff4d4d;
+            --warning: #ffcc00;
+            --success: #00cc66;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--neon-green);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green-dim);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 5px 5px 0 0;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+            font-weight: bold;
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(130, 195, 118, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+            z-index: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(57, 255, 20, 0.15);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--neon-green);
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: all 0.5s ease;
+        }
+
+        .card:hover .card-value {
+            color: var(--neon-green);
+            transform: scale(1.05);
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        select, input, button, textarea {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--bg-tertiary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green-dim);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #2de00c;
+            box-shadow: 0 0 10px var(--neon-green-dim);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #ff3333;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        tr {
+            transition: background 0.3s ease;
+        }
+
+        tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-high {
+            background: var(--danger);
+            color: white;
+        }
+
+        .badge-medium {
+            background: var(--warning);
+            color: black;
+        }
+
+        .badge-low {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-pending {
+            color: var(--warning);
+        }
+
+        .status-progress {
+            color: var(--neon-green);
+        }
+
+        .status-completed {
+            color: var(--success);
+        }
+
+        .status-paid {
+            color: var(--success);
+        }
+
+        .status-unpaid {
+            color: var(--danger);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--neon-green);
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid var(--bg-tertiary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green-dim);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav-btn {
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav-btn:hover {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+        }
+
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--neon-green);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: var(--neon-green);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .calendar-day {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--neon-green);
+        }
+
+        .calendar-day.booked {
+            background: rgba(255, 77, 77, 0.2);
+            color: var(--danger);
+        }
+
+        .calendar-day.partially-booked {
+            background: rgba(255, 204, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .booking-dot {
+            position: absolute;
+            bottom: 5px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--neon-green);
+        }
+
+        .booking-dot.booked {
+            background: var(--danger);
+        }
+
+        .booking-dot.partial {
+            background: var(--warning);
+        }
+
+        .property-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .property-btn {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .property-btn.active {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalFadeIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: rotate(45deg) translateX(-100%);
+            }
+            100% {
+                transform: rotate(45deg) translateX(100%);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(130, 195, 118, 0.7);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(130, 195, 118, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(130, 195, 118, 0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .calendar-day {
+                height: 40px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Property Managment System</div>
+            <div id="current-date"></div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="staff">Staff Management</button>
+            <button class="tab" data-tab="tasks">Task Management</button>
+            <button class="tab" data-tab="calendar">Booking Calendar</button>
+            <button class="tab" data-tab="reports">Reports</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Property Management Dashboard</h2>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Total Staff</div>
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-value" id="total-staff">0</div>
+                        <div class="card-desc">Across all properties</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Hours This Week</div>
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-value" id="total-hours">0</div>
+                        <div class="card-desc">Total hours worked</div>
+                    </div>
+                </div>
+                
+                <div class="card pulse">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Overtime</div>
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="card-value" id="total-overtime">0</div>
+                        <div class="card-desc">Overtime hours this week</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Expenses</div>
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="card-value" id="total-expenses">$0</div>
+                        <div class="card-desc">This month</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Staff by Property</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">HH-Villa</div>
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="card-value" id="property-1-count">0</div>
+                        <div class="card-desc" id="property-1-departments">No staff</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Shalaheart</div>
+                            <i class="fas fa-hotel"></i>
+                        </div>
+                        <div class="card-value" id="property-2-count">0</div>
+                        <div class="card-desc" id="property-2-departments">No staff</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Serenity Houses</div>
+                            <i class="fas fa-house-user"></i>
+                        </div>
+                        <div class="card-value" id="property-3-count">0</div>
+                        <div class="card-desc" id="property-3-departments">No staff</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Pink House</div>
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="card-value" id="property-4-count">0</div>
+                        <div class="card-desc" id="property-4-departments">No staff</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Recent Tasks</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned To</th>
+                        <th>Property</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-tasks">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Staff Management Tab -->
+        <div id="staff" class="tab-content">
+            <h2>Staff Management</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" id="staff-search" placeholder="Search by name...">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Property</label>
+                    <select id="filter-property">
+                        <option value="all">All Properties</option>
+                        <option value="HH-Villa">HH-Villa</option>
+                        <option value="Shalaheart">ShalaHeart</option>
+                        <option value="Serenity Houses">Serenity Houses</option>
+                        <option value="Pink House">Pink House</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Department</label>
+                    <select id="filter-department">
+                        <option value="all">All Departments</option>
+                        <option value="Housekeeping">Housekeeping</option>
+                        <option value="Security">Security</option>
+                        <option value="Gardening">Gardening</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <button class="btn btn-primary" id="add-staff-btn">Add New Staff</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Property</th>
+                        <th>Department</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-table-body">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Task Management Tab -->
+        <div id="tasks" class="tab-content">
+            <h2>Task Management</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" id="task-search" placeholder="Search tasks...">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select id="filter-status">
+                        <option value="all">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Priority</label>
+                    <select id="filter-priority">
+                        <option value="all">All Priorities</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <button class="btn btn-primary" id="add-task-btn">Create New Task</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned To</th>
+                        <th>Property</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="task-table-body">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="calendar" class="tab-content">
+            <h2>Property Booking Calendar</h2>
+            
+            <div class="property-selector">
+                <button class="property-btn active" data-property="all">All Properties</button>
+                <button class="property-btn" data-property="HH-Villa">HH-Villa</button>
+                <button class="property-btn" data-property="Shalaheart">ShalaHeart</button>
+                <button class="property-btn" data-property="Serenity Houses">Serenity Houses</button>
+                <button class="property-btn" data-property="Pink House">Pink House</button>
+                <button class="btn btn-primary" id="add-booking-btn"><i class="fas fa-plus"></i> Add Booking</button>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                        <button class="calendar-nav-btn" id="today-btn">Today</button>
+                        <button class="calendar-nav-btn" id="next-month"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <h3 class="calendar-title" id="calendar-month-year">January 2023</h3>
+                    <div class="calendar-legend">
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                            <div class="booking-dot"></div> <span>Available</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                            <div class="booking-dot partial"></div> <span>Partially Booked</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                            <div class="booking-dot booked"></div> <span>Booked</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid" id="calendar-days-header">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                </div>
+                
+                <div class="calendar-grid" id="calendar-days">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div id="booking-details" style="margin-top: 20px;">
+                <h3>Booking Details for <span id="selected-date"></span></h3>
+                <div id="booking-list">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <h2>Reports & Analytics</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Time Period</label>
+                    <select id="report-period">
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Property</label>
+                    <select id="report-property">
+                        <option value="all">All Properties</option>
+                        <option value="HH-Villa">HH-Villa</option>
+                        <option value="Shalaheart">ShalaHeart</option>
+                        <option value="Serenity Houses">Serenity Houses</option>
+                        <option value="Pink House">Pink House</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <button class="btn btn-primary" id="generate-report">Generate Report</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Department Distribution</div>
+                        </div>
+                        <div id="dept-chart">
+                            <!-- Chart will be populated by JavaScript -->
+                            <div style="padding: 20px; text-align: center;">
+                                Department distribution will appear here
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Overtime Trends</div>
+                        </div>
+                        <div id="overtime-chart">
+                            <!-- Chart will be populated by JavaScript -->
+                            <div style="padding: 20px; text-align: center;">
+                                Overtime trends will appear here
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Staff Performance</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Property</th>
+                        <th>Department</th>
+                        <th>Tasks Completed</th>
+                        <th>Avg. Hours</th>
+                        <th>Overtime</th>
+                        <th>Performance Score</th>
+                    </tr>
+                </thead>
+                <tbody id="performance-table-body">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Staff Modal -->
+    <div id="staff-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="modal-title" id="staff-modal-title">Add Staff Member</h2>
+            
+            <form id="staff-form">
+                <input type="hidden" id="staff-id">
+                
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="staff-name" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="staff-email" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Phone (with country code)</label>
+                    <input type="tel" id="staff-phone" class="form-input" placeholder="+1234567890" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <input type="text" id="staff-position" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Property</label>
+                    <select id="staff-property" class="form-input" required>
+                        <option value="">Select Property</option>
+                        <option value="HH-Villa">HH-Villa</option>
+                        <option value="Shalaheart">ShalaHeart</option>
+                        <option value="Serenity Houses">Serenity Houses</option>
+                        <option value="Pink House">Pink House</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select id="staff-department" class="form-input" required>
+                        <option value="">Select Department</option>
+                        <option value="Housekeeping">Housekeeping</option>
+                        <option value="Security">Security</option>
+                        <option value="Gardening">Gardening</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Hire Date</label>
+                    <input type="date" id="staff-hire-date" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Hourly Rate ($)</label>
+                    <input type="number" id="staff-rate" class="form-input" min="0" step="0.01" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Staff Member</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="modal-title" id="task-modal-title">Create Task</h2>
+            
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                
+                <div class="form-group">
+                    <label class="form-label">Task Title</label>
+                    <input type="text" id="task-title" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="task-description" class="form-input" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Assigned To</label>
+                    <select id="task-assigned-to" class="form-input" required>
+                        <option value="">Select Staff Member</option>
+                        <!-- Will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Property</label>
+                    <select id="task-property" class="form-input" required>
+                        <option value="">Select Property</option>
+                        <option value="HH-Villa">HH-Villa</option>
+                        <option value="Shalaheart">ShalaHeart</option>
+                        <option value="Serenity Houses">Serenity Houses</option>
+                        <option value="Pink House">Pink House</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select id="task-priority" class="form-input" required>
+                        <option value="">Select Priority</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="task-status" class="form-input" required>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" id="task-due-date" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Estimated Hours</label>
+                    <input type="number" id="task-estimated-hours" class="form-input" min="0" step="0.5" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Task</button>
+                <button type="button" class="btn btn-whatsapp" id="send-whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="modal-title" id="booking-modal-title">Add Booking</h2>
+            
+            <form id="booking-form">
+                <input type="hidden" id="booking-id">
+                <input type="hidden" id="booking-date">
+                
+                <div class="form-group">
+                    <label class="form-label">Property</label>
+                    <select id="booking-property" class="form-input" required>
+                        <option value="">Select Property</option>
+                        <option value="HH-Villa">HH-Villa</option>
+                        <option value="Shalaheart">ShalaHeart</option>
+                        <option value="Serenity Houses">Serenity Houses</option>
+                        <option value="Pink House">Pink House</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Guest Name</label>
+                    <input type="text" id="booking-guest" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Guest Contact</label>
+                    <input type="text" id="booking-guest-contact" class="form-input" placeholder="Phone or email">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Check-in Date</label>
+                    <input type="date" id="booking-checkin" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Check-out Date</label>
+                    <input type="date" id="booking-checkout" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Booking Source</label>
+                    <select id="booking-source" class="form-input" required>
+                        <option value="">Select Source</option>
+                        <option value="Airbnb">Airbnb</option>
+                        <option value="Booking.com">Booking.com</option>
+                        <option value="Website">Website</option>
+                        <option value="Direct">Direct</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Payment Status</label>
+                    <select id="booking-payment-status" class="form-input" required>
+                        <option value="Paid">Paid</option>
+                        <option value="Deposit">Deposit Paid</option>
+                        <option value="Pending">Payment Pending</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Total Amount</label>
+                    <input type="number" id="booking-amount" class="form-input" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea id="booking-notes" class="form-input" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Data storage
+        let staffMembers = JSON.parse(localStorage.getItem('staffMembers')) || [];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+        
+        // Properties and departments
+        const properties = [
+            'HH-Villa', 
+            'Shalaheart', 
+            'Serenity Houses', 
+            'Pink House'
+        ];
+        
+        const departments = [
+            'Housekeeping',
+            'Security',
+            'Gardening'
+        ];
+        
+        // Booking sources
+        const bookingSources = [
+            'Airbnb',
+            'Booking.com',
+            'Website',
+            'Direct',
+            'Referral',
+            'Other'
+        ];
+        
+        // Calendar variables
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let selectedProperty = 'all';
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Set up tab navigation
+            setupTabs();
+            
+            // Load initial data
+            loadDashboard();
+            loadStaffTable();
+            loadTaskTable();
+            loadPerformanceTable();
+            renderCalendar();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Add sample data if empty
+            if (staffMembers.length === 0) {
+                addSampleData();
+            }
+        });
+        
+        // Set up tab navigation
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                    
+                    // Refresh data if needed
+                    if (tab.dataset.tab === 'dashboard') {
+                        loadDashboard();
+                    } else if (tab.dataset.tab === 'reports') {
+                        loadPerformanceTable();
+                    } else if (tab.dataset.tab === 'calendar') {
+                        renderCalendar();
+                    }
+                });
+            });
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Staff filters
+            document.getElementById('staff-search').addEventListener('input', loadStaffTable);
+            document.getElementById('filter-property').addEventListener('change', loadStaffTable);
+            document.getElementById('filter-department').addEventListener('change', loadStaffTable);
+            
+            // Task filters
+            document.getElementById('task-search').addEventListener('input', loadTaskTable);
+            document.getElementById('filter-status').addEventListener('change', loadTaskTable);
+            document.getElementById('filter-priority').addEventListener('change', loadTaskTable);
+            
+            // Add staff button
+            document.getElementById('add-staff-btn').addEventListener('click', () => {
+                openStaffModal();
+            });
+            
+            // Add task button
+            document.getElementById('add-task-btn').addEventListener('click', () => {
+                openTaskModal();
+            });
+            
+            // Add booking button
+            document.getElementById('add-booking-btn').addEventListener('click', () => {
+                openBookingModal();
+            });
+            
+            // Staff form submission
+            document.getElementById('staff-form').addEventListener('submit', handleStaffSubmit);
+            
+            // Task form submission
+            document.getElementById('task-form').addEventListener('submit', handleTaskSubmit);
+            
+            // Booking form submission
+            document.getElementById('booking-form').addEventListener('submit', handleBookingSubmit);
+            
+            // WhatsApp button
+            document.getElementById('send-whatsapp-btn').addEventListener('click', sendTaskViaWhatsApp);
+            
+            // Modal close buttons
+            document.querySelectorAll('.modal-close').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Calendar navigation
+            document.getElementById('prev-month').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            });
+            
+            document.getElementById('next-month').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            });
+            
+            document.getElementById('today-btn').addEventListener('click', () => {
+                currentDate = new Date();
+                currentMonth = currentDate.getMonth();
+                currentYear = currentDate.getFullYear();
+                renderCalendar();
+            });
+            
+            // Property filter buttons
+            document.querySelectorAll('.property-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.id !== 'add-booking-btn') {
+                        document.querySelectorAll('.property-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        button.classList.add('active');
+                        selectedProperty = button.dataset.property;
+                        renderCalendar();
+                    }
+                });
+            });
+        }
+        
+        // Load dashboard data
+        function loadDashboard() {
+            // Calculate totals
+            const totalStaff = staffMembers.length;
+            const totalHours = staffMembers.reduce((sum, staff) => sum + (staff.hoursThisWeek || 0), 0);
+            const totalOvertime = staffMembers.reduce((sum, staff) => sum + (staff.overtimeHours || 0), 0);
+            const totalExpenses = staffMembers.reduce((sum, staff) => {
+                const weeklyPay = (staff.hoursThisWeek || 0) * (staff.hourlyRate || 0);
+                return sum + weeklyPay;
+            }, 0);
+            
+            // Update dashboard cards
+            document.getElementById('total-staff').textContent = totalStaff;
+            document.getElementById('total-hours').textContent = totalHours;
+            document.getElementById('total-overtime').textContent = totalOvertime;
+            document.getElementById('total-expenses').textContent = `$${totalExpenses.toFixed(2)}`;
+            
+            // Update property counts
+            properties.forEach((property, index) => {
+                const count = staffMembers.filter(staff => staff.property === property).length;
+                document.getElementById(`property-${index+1}-count`).textContent = count;
+                
+                // Get department breakdown
+                const deptCounts = {};
+                departments.forEach(dept => {
+                    deptCounts[dept] = staffMembers.filter(staff => 
+                        staff.property === property && staff.department === dept
+                    ).length;
+                });
+                
+                const deptText = Object.entries(deptCounts)
+                    .filter(([_, count]) => count > 0)
+                    .map(([dept, count]) => `${dept}: ${count}`)
+                    .join(', ') || 'No staff';
+                
+                document.getElementById(`property-${index+1}-departments`).textContent = deptText;
+            });
+            
+            // Load recent tasks
+            loadRecentTasks();
+        }
+        
+        // Load staff table with filtering
+        function loadStaffTable() {
+            const searchTerm = document.getElementById('staff-search').value.toLowerCase();
+            const propertyFilter = document.getElementById('filter-property').value;
+            const departmentFilter = document.getElementById('filter-department').value;
+            
+            const tbody = document.getElementById('staff-table-body');
+            tbody.innerHTML = '';
+            
+            const filteredStaff = staffMembers.filter(staff => {
+                const matchesSearch = staff.name.toLowerCase().includes(searchTerm);
+                const matchesProperty = propertyFilter === 'all' || staff.property === propertyFilter;
+                const matchesDepartment = departmentFilter === 'all' || staff.department === departmentFilter;
+                
+                return matchesSearch && matchesProperty && matchesDepartment;
+            });
+            
+            if (filteredStaff.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No staff members found</td></tr>';
+                return;
+            }
+            
+            filteredStaff.forEach(staff => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${staff.name}</td>
+                    <td>${staff.position}</td>
+                    <td>${staff.property}</td>
+                    <td>${staff.department}</td>
+                    <td>${staff.phone || 'N/A'}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary" data-id="${staff.id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn btn-danger" data-id="${staff.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            tbody.querySelectorAll('.btn-primary').forEach(button => {
+                button.addEventListener('click', () => {
+                    const staffId = button.dataset.id;
+                    openStaffModal(staffId);
+                });
+            });
+            
+            tbody.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', () => {
+                    const staffId = button.dataset.id;
+                    deleteStaff(staffId);
+                });
+            });
+        }
+        
+        // Load task table with filtering
+        function loadTaskTable() {
+            const searchTerm = document.getElementById('task-search').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const priorityFilter = document.getElementById('filter-priority').value;
+            
+            const tbody = document.getElementById('task-table-body');
+            tbody.innerHTML = '';
+            
+            const filteredTasks = tasks.filter(task => {
+                const matchesSearch = task.title.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+                const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+                
+                return matchesSearch && matchesStatus && matchesPriority;
+            });
+            
+            if (filteredTasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No tasks found</td></tr>';
+                return;
+            }
+            
+            filteredTasks.forEach(task => {
+                const row = document.createElement('tr');
+                
+                // Get assigned staff member name
+                const assignedStaff = staffMembers.find(staff => staff.id === task.assignedTo);
+                const staffName = assignedStaff ? assignedStaff.name : 'Unassigned';
+                
+                // Priority badge
+                let priorityClass = '';
+                if (task.priority === 'High') priorityClass = 'badge-high';
+                if (task.priority === 'Medium') priorityClass = 'badge-medium';
+                if (task.priority === 'Low') priorityClass = 'badge-low';
+                
+                // Status class
+                let statusClass = '';
+                if (task.status === 'Pending') statusClass = 'status-pending';
+                if (task.status === 'In Progress') statusClass = 'status-progress';
+                if (task.status === 'Completed') statusClass = 'status-completed';
+                
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${staffName}</td>
+                    <td>${task.property}</td>
+                    <td><span class="badge ${priorityClass}">${task.priority}</span></td>
+                    <td class="${statusClass}">${task.status}</td>
+                    <td>${formatDate(task.dueDate)}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary" data-id="${task.id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn btn-whatsapp" data-id="${task.id}"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        <button class="action-btn btn-danger" data-id="${task.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            tbody.querySelectorAll('.btn-primary').forEach(button => {
+                button.addEventListener('click', () => {
+                    const taskId = button.dataset.id;
+                    openTaskModal(taskId);
+                });
+            });
+            
+            tbody.querySelectorAll('.btn-whatsapp').forEach(button => {
+                button.addEventListener('click', () => {
+                    const taskId = button.dataset.id;
+                    sendTaskViaWhatsApp(taskId);
+                });
+            });
+            
+            tbody.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', () => {
+                    const taskId = button.dataset.id;
+                    deleteTask(taskId);
+                });
+            });
+        }
+        
+        // Load recent tasks for dashboard
+        function loadRecentTasks() {
+            const tbody = document.getElementById('recent-tasks');
+            tbody.innerHTML = '';
+            
+            // Get up to 5 most recent tasks
+            const recentTasks = [...tasks]
+                .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+                .slice(0, 5);
+            
+            if (recentTasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No tasks yet</td></tr>';
+                return;
+            }
+            
+            recentTasks.forEach(task => {
+                const row = document.createElement('tr');
+                
+                // Get assigned staff member name
+                const assignedStaff = staffMembers.find(staff => staff.id === task.assignedTo);
+                const staffName = assignedStaff ? assignedStaff.name : 'Unassigned';
+                
+                // Priority badge
+                let priorityClass = '';
+                if (task.priority === 'High') priorityClass = 'badge-high';
+                if (task.priority === 'Medium') priorityClass = 'badge-medium';
+                if (task.priority === 'Low') priorityClass = 'badge-low';
+                
+                // Status class
+                let statusClass = '';
+                if (task.status === 'Pending') statusClass = 'status-pending';
+                if (task.status === 'In Progress') statusClass = 'status-progress';
+                if (task.status === 'Completed') statusClass = 'status-completed';
+                
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${staffName}</td>
+                    <td>${task.property}</td>
+                    <td><span class="badge ${priorityClass}">${task.priority}</span></td>
+                    <td class="${statusClass}">${task.status}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Load performance table for reports
+        function loadPerformanceTable() {
+            const tbody = document.getElementById('performance-table-body');
+            tbody.innerHTML = '';
+            
+            if (staffMembers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No staff data available</td></tr>';
+                return;
+            }
+            
+            staffMembers.forEach(staff => {
+                const staffTasks = tasks.filter(task => task.assignedTo === staff.id);
+                const completedTasks = staffTasks.filter(task => task.status === 'Completed').length;
+                
+                // Calculate performance score (simplified)
+                const performanceScore = Math.min(100, Math.floor((completedTasks / Math.max(1, staffTasks.length)) * 100));
+                
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${staff.name}</td>
+                    <td>${staff.property}</td>
+                    <td>${staff.department}</td>
+                    <td>${completedTasks}</td>
+                    <td>${staff.hoursThisWeek || 0}</td>
+                    <td>${staff.overtimeHours || 0}</td>
+                    <td>${performanceScore}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Render calendar
+        function renderCalendar() {
+            const calendarDays = document.getElementById('calendar-days');
+            calendarDays.innerHTML = '';
+            
+            // Set calendar title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendar-month-year').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Get first day of month and number of days in month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Get days from previous month
+            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+            
+            // Create previous month's days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = daysInPrevMonth - i;
+                calendarDays.appendChild(day);
+            }
+            
+            // Create current month's days
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+                
+                // Check if it's today
+                if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                    day.classList.add('today');
+                }
+                
+                // Check if date has bookings
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayBookings = getBookingsForDate(dateStr);
+                
+                if (dayBookings.length > 0) {
+                    if (dayBookings.length >= 3) {
+                        day.classList.add('booked');
+                    } else {
+                        day.classList.add('partially-booked');
+                    }
+                    
+                    // Add click event to show bookings
+                    day.addEventListener('click', () => {
+                        showBookingsForDate(dateStr);
+                    });
+                }
+                
+                calendarDays.appendChild(day);
+            }
+            
+            // Calculate days needed from next month
+            const totalCells = 42; // 6 weeks of 7 days
+            const remainingCells = totalCells - (firstDay + daysInMonth);
+            
+            // Create next month's days
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = i;
+                calendarDays.appendChild(day);
+            }
+        }
+        
+        // Get bookings for a specific date
+        function getBookingsForDate(dateStr) {
+            if (selectedProperty === 'all') {
+                return bookings.filter(booking => {
+                    const checkIn = new Date(booking.checkIn);
+                    const checkOut = new Date(booking.checkOut);
+                    const date = new Date(dateStr);
+                    
+                    return date >= checkIn && date <= checkOut;
+                });
+            } else {
+                return bookings.filter(booking => {
+                    const checkIn = new Date(booking.checkIn);
+                    const checkOut = new Date(booking.checkOut);
+                    const date = new Date(dateStr);
+                    
+                    return booking.property === selectedProperty && date >= checkIn && date <= checkOut;
+                });
+            }
+        }
+        
+        // Show bookings for a specific date
+        function showBookingsForDate(dateStr) {
+            const date = new Date(dateStr);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('selected-date').textContent = formattedDate;
+            
+            const bookingsList = document.getElementById('booking-list');
+            bookingsList.innerHTML = '';
+            
+            const dayBookings = getBookingsForDate(dateStr);
+            
+            if (dayBookings.length === 0) {
+                bookingsList.innerHTML = '<p>No bookings for this date.</p>';
+                return;
+            }
+            
+            dayBookings.forEach(booking => {
+                const bookingEl = document.createElement('div');
+                bookingEl.className = 'booking-item';
+                bookingEl.style.padding = '10px';
+                bookingEl.style.marginBottom = '10px';
+                bookingEl.style.background = 'var(--bg-tertiary)';
+                bookingEl.style.borderRadius = '5px';
+                
+                const paymentClass = booking.paymentStatus === 'Paid' ? 'status-paid' : 
+                                   (booking.paymentStatus === 'Deposit' ? 'status-progress' : 'status-unpaid');
+                
+                bookingEl.innerHTML = `
+                    <h4>${booking.guestName} - ${booking.property}</h4>
+                    <p>Check-in: ${formatDate(booking.checkIn)} | Check-out: ${formatDate(booking.checkOut)}</p>
+                    <p>Source: ${booking.source} | Status: <span class="${paymentClass}">${booking.paymentStatus}</span></p>
+                    <p>Amount: $${booking.amount || '0'}</p>
+                    ${booking.notes ? `<p>Notes: ${booking.notes}</p>` : ''}
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary" data-id="${booking.id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn btn-danger" data-id="${booking.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                
+                bookingsList.appendChild(bookingEl);
+            });
+            
+            // Add event listeners to action buttons
+            bookingsList.querySelectorAll('.btn-primary').forEach(button => {
+                button.addEventListener('click', () => {
+                    const bookingId = button.dataset.id;
+                    openBookingModal(null, bookingId);
+                });
+            });
+            
+            bookingsList.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', () => {
+                    const bookingId = button.dataset.id;
+                    deleteBooking(bookingId);
+                });
+            });
+        }
+        
+        // Open staff modal for adding/editing
+        function openStaffModal(staffId = null) {
+            const modal = document.getElementById('staff-modal');
+            const title = document.getElementById('staff-modal-title');
+            const form = document.getElementById('staff-form');
+            
+            if (staffId) {
+                // Edit existing staff
+                title.textContent = 'Edit Staff Member';
+                const staff = staffMembers.find(s => s.id === staffId);
+                
+                if (staff) {
+                    document.getElementById('staff-id').value = staff.id;
+                    document.getElementById('staff-name').value = staff.name;
+                    document.getElementById('staff-email').value = staff.email;
+                    document.getElementById('staff-phone').value = staff.phone;
+                    document.getElementById('staff-position').value = staff.position;
+                    document.getElementById('staff-property').value = staff.property;
+                    document.getElementById('staff-department').value = staff.department;
+                    document.getElementById('staff-hire-date').value = staff.hireDate;
+                    document.getElementById('staff-rate').value = staff.hourlyRate;
+                }
+            } else {
+                // Add new staff
+                title.textContent = 'Add Staff Member';
+                form.reset();
+                document.getElementById('staff-id').value = '';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Open task modal for adding/editing
+        function openTaskModal(taskId = null) {
+            const modal = document.getElementById('task-modal');
+            const title = document.getElementById('task-modal-title');
+            const form = document.getElementById('task-form');
+            const assignedToSelect = document.getElementById('task-assigned-to');
+            
+            // Populate staff dropdown
+            assignedToSelect.innerHTML = '<option value="">Select Staff Member</option>';
+            staffMembers.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff.id;
+                option.textContent = staff.name;
+                assignedToSelect.appendChild(option);
+            });
+            
+            if (taskId) {
+                // Edit existing task
+                title.textContent = 'Edit Task';
+                const task = tasks.find(t => t.id === taskId);
+                
+                if (task) {
+                    document.getElementById('task-id').value = task.id;
+                    document.getElementById('task-title').value = task.title;
+                    document.getElementById('task-description').value = task.description;
+                    document.getElementById('task-assigned-to').value = task.assignedTo;
+                    document.getElementById('task-property').value = task.property;
+                    document.getElementById('task-priority').value = task.priority;
+                    document.getElementById('task-status').value = task.status;
+                    document.getElementById('task-due-date').value = task.dueDate;
+                    document.getElementById('task-estimated-hours').value = task.estimatedHours;
+                }
+            } else {
+                // Add new task
+                title.textContent = 'Create Task';
+                form.reset();
+                document.getElementById('task-id').value = '';
+                document.getElementById('task-status').value = 'Pending';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Open booking modal
+        function openBookingModal(dateStr = null, bookingId = null) {
+            const modal = document.getElementById('booking-modal');
+            const title = document.getElementById('booking-modal-title');
+            const form = document.getElementById('booking-form');
+            
+            if (bookingId) {
+                // Edit existing booking
+                title.textContent = 'Edit Booking';
+                const booking = bookings.find(b => b.id === bookingId);
+                
+                if (booking) {
+                    document.getElementById('booking-id').value = booking.id;
+                    document.getElementById('booking-property').value = booking.property;
+                    document.getElementById('booking-guest').value = booking.guestName;
+                    document.getElementById('booking-guest-contact').value = booking.guestContact || '';
+                    document.getElementById('booking-checkin').value = booking.checkIn;
+                    document.getElementById('booking-checkout').value = booking.checkOut;
+                    document.getElementById('booking-source').value = booking.source;
+                    document.getElementById('booking-payment-status').value = booking.paymentStatus;
+                    document.getElementById('booking-amount').value = booking.amount || '';
+                    document.getElementById('booking-notes').value = booking.notes || '';
+                }
+            } else {
+                // Add new booking
+                title.textContent = 'Add Booking';
+                form.reset();
+                document.getElementById('booking-id').value = '';
+                
+                if (dateStr) {
+                    document.getElementById('booking-checkin').value = dateStr;
+                    
+                    // Set checkout to next day
+                    const nextDay = new Date(dateStr);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    document.getElementById('booking-checkout').value = nextDay.toISOString().split('T')[0];
+                }
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Handle staff form submission
+        function handleStaffSubmit(e) {
+            e.preventDefault();
+            
+            const staffId = document.getElementById('staff-id').value;
+            const staffData = {
+                name: document.getElementById('staff-name').value,
+                email: document.getElementById('staff-email').value,
+                phone: document.getElementById('staff-phone').value,
+                position: document.getElementById('staff-position').value,
+                property: document.getElementById('staff-property').value,
+                department: document.getElementById('staff-department').value,
+                hireDate: document.getElementById('staff-hire-date').value,
+                hourlyRate: parseFloat(document.getElementById('staff-rate').value)
+            };
+            
+            if (staffId) {
+                // Update existing staff
+                updateStaff(staffId, staffData);
+            } else {
+                // Add new staff
+                addStaff(staffData);
+            }
+        }
+        
+        // Handle task form submission
+        function handleTaskSubmit(e) {
+            e.preventDefault();
+            
+            const taskId = document.getElementById('task-id').value;
+            const taskData = {
+                title: document.getElementById('task-title').value,
+                description: document.getElementById('task-description').value,
+                assignedTo: document.getElementById('task-assigned-to').value,
+                property: document.getElementById('task-property').value,
+                priority: document.getElementById('task-priority').value,
+                status: document.getElementById('task-status').value,
+                dueDate: document.getElementById('task-due-date').value,
+                estimatedHours: parseFloat(document.getElementById('task-estimated-hours').value),
+                createdDate: taskId ? tasks.find(t => t.id === taskId).createdDate : new Date().toISOString()
+            };
+            
+            if (taskId) {
+                // Update existing task
+                updateTask(taskId, taskData);
+            } else {
+                // Add new task
+                addTask(taskData);
+            }
+        }
+        
+        // Handle booking form submission
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            
+            const bookingId = document.getElementById('booking-id').value;
+            const bookingData = {
+                property: document.getElementById('booking-property').value,
+                guestName: document.getElementById('booking-guest').value,
+                guestContact: document.getElementById('booking-guest-contact').value,
+                checkIn: document.getElementById('booking-checkin').value,
+                checkOut: document.getElementById('booking-checkout').value,
+                source: document.getElementById('booking-source').value,
+                paymentStatus: document.getElementById('booking-payment-status').value,
+                amount: document.getElementById('booking-amount').value,
+                notes: document.getElementById('booking-notes').value
+            };
+            
+            if (bookingId) {
+                // Update existing booking
+                updateBooking(bookingId, bookingData);
+            } else {
+                // Add new booking
+                addBooking(bookingData);
+            }
+        }
+        
+        // Send task via WhatsApp
+        function sendTaskViaWhatsApp(taskId = null) {
+            let taskData = {};
+            
+            if (taskId) {
+                // Send existing task
+                const task = tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                taskData = task;
+            } else {
+                // Send task from form
+                taskData = {
+                    title: document.getElementById('task-title').value,
+                    description: document.getElementById('task-description').value,
+                    assignedTo: document.getElementById('task-assigned-to').value,
+                    property: document.getElementById('task-property').value,
+                    priority: document.getElementById('task-priority').value,
+                    dueDate: document.getElementById('task-due-date').value,
+                    estimatedHours: document.getElementById('task-estimated-hours').value
+                };
+                
+                // Validate form data
+                if (!taskData.title || !taskData.assignedTo) {
+                    showNotification('Please fill in all required task fields', 'error');
+                    return;
+                }
+            }
+            
+            // Get assigned staff member
+            const assignedStaff = staffMembers.find(staff => staff.id === taskData.assignedTo);
+            if (!assignedStaff || !assignedStaff.phone) {
+                showNotification('Staff member does not have a phone number', 'error');
+                return;
+            }
+            
+            // Format WhatsApp message
+            const message = encodeURIComponent(
+                `*New Task Assignment*\n\n` +
+                `*Title:* ${taskData.title}\n` +
+                `*Description:* ${taskData.description}\n` +
+                `*Property:* ${taskData.property}\n` +
+                `*Priority:* ${taskData.priority}\n` +
+                `*Due Date:* ${formatDate(taskData.dueDate)}\n` +
+                `*Estimated Hours:* ${taskData.estimatedHours}\n\n` +
+                `Please confirm receipt of this task.`
+            );
+            
+            // Create WhatsApp link
+            const phone = assignedStaff.phone.replace(/\D/g, ''); // Remove non-digit characters
+            const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+            
+            // Open WhatsApp in new tab
+            window.open(whatsappUrl, '_blank');
+            
+            showNotification('WhatsApp message prepared for ' + assignedStaff.name, 'success');
+        }
+        
+        // Add new staff member
+        function addStaff(staffData) {
+            const newStaff = {
+                id: generateId(),
+                ...staffData,
+                hoursThisWeek: 0,
+                overtimeHours: 0,
+                leaveDays: 0,
+                sickDays: 0
+            };
+            
+            staffMembers.push(newStaff);
+            saveData();
+            
+            document.getElementById('staff-modal').style.display = 'none';
+            showNotification('Staff member added successfully', 'success');
+            
+            // Refresh tables
+            loadDashboard();
+            loadStaffTable();
+        }
+        
+        // Update existing staff member
+        function updateStaff(staffId, staffData) {
+            const index = staffMembers.findIndex(staff => staff.id === staffId);
+            
+            if (index !== -1) {
+                // Preserve existing metrics
+                const existingMetrics = {
+                    hoursThisWeek: staffMembers[index].hoursThisWeek,
+                    overtimeHours: staffMembers[index].overtimeHours,
+                    leaveDays: staffMembers[index].leaveDays,
+                    sickDays: staffMembers[index].sickDays
+                };
+                
+                staffMembers[index] = {
+                    id: staffId,
+                    ...staffData,
+                    ...existingMetrics
+                };
+                
+                saveData();
+                
+                document.getElementById('staff-modal').style.display = 'none';
+                showNotification('Staff member updated successfully', 'success');
+                
+                // Refresh tables
+                loadDashboard();
+                loadStaffTable();
+            }
+        }
+        
+        // Delete staff member
+        function deleteStaff(staffId) {
+            if (confirm('Are you sure you want to delete this staff member?')) {
+                staffMembers = staffMembers.filter(staff => staff.id !== staffId);
+                
+                // Also remove any tasks assigned to this staff member
+                tasks = tasks.filter(task => task.assignedTo !== staffId);
+                
+                saveData();
+                showNotification('Staff member deleted successfully', 'success');
+                
+                // Refresh tables
+                loadDashboard();
+                loadStaffTable();
+                loadTaskTable();
+            }
+        }
+        
+        // Add new task
+        function addTask(taskData) {
+            const newTask = {
+                id: generateId(),
+                ...taskData
+            };
+            
+            tasks.push(newTask);
+            saveData();
+            
+            document.getElementById('task-modal').style.display = 'none';
+            showNotification('Task created successfully', 'success');
+            
+            // Refresh tables
+            loadDashboard();
+            loadTaskTable();
+        }
+        
+        // Update existing task
+        function updateTask(taskId, taskData) {
+            const index = tasks.findIndex(task => task.id === taskId);
+            
+            if (index !== -1) {
+                tasks[index] = {
+                    id: taskId,
+                    ...taskData
+                };
+                
+                saveData();
+                
+                document.getElementById('task-modal').style.display = 'none';
+                showNotification('Task updated successfully', 'success');
+                
+                // Refresh tables
+                loadDashboard();
+                loadTaskTable();
+            }
+        }
+        
+        // Delete task
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks = tasks.filter(task => task.id !== taskId);
+                saveData();
+                
+                showNotification('Task deleted successfully', 'success');
+                
+                // Refresh tables
+                loadDashboard();
+                loadTaskTable();
+            }
+        }
+        
+        // Add new booking
+        function addBooking(bookingData) {
+            const newBooking = {
+                id: generateId(),
+                ...bookingData
+            };
+            
+            bookings.push(newBooking);
+            saveData();
+            
+            document.getElementById('booking-modal').style.display = 'none';
+            showNotification('Booking added successfully', 'success');
+            
+            // Refresh calendar
+            renderCalendar();
+        }
+        
+        // Update existing booking
+        function updateBooking(bookingId, bookingData) {
+            const index = bookings.findIndex(booking => booking.id === bookingId);
+            
+            if (index !== -1) {
+                bookings[index] = {
+                    id: bookingId,
+                    ...bookingData
+                };
+                
+                saveData();
+                
+                document.getElementById('booking-modal').style.display = 'none';
+                showNotification('Booking updated successfully', 'success');
+                
+                // Refresh calendar
+                renderCalendar();
+            }
+        }
+        
+        // Delete booking
+        function deleteBooking(bookingId) {
+            if (confirm('Are you sure you want to delete this booking?')) {
+                bookings = bookings.filter(booking => booking.id !== bookingId);
+                saveData();
+                
+                showNotification('Booking deleted successfully', 'success');
+                
+                // Refresh calendar
+                renderCalendar();
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('staffMembers', JSON.stringify(staffMembers));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            messageEl.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+        
+        // Add sample data for demonstration
+        function addSampleData() {
+            // Sample staff members
+            const sampleStaff = [
+                {
+                    id: generateId(),
+                    name: 'Maria Rodriguez',
+                    email: 'maria@example.com',
+                    phone: '+1234567890',
+                    position: 'Head Housekeeper',
+                    property: 'HH-Villa',
+                    department: 'Housekeeping',
+                    hireDate: '2022-03-15',
+                    hourlyRate: 22.50,
+                    hoursThisWeek: 40,
+                    overtimeHours: 5,
+                    leaveDays: 2,
+                    sickDays: 1
+                },
+                {
+                    id: generateId(),
+                    name: 'James Wilson',
+                    email: 'james@example.com',
+                    phone: '+1987654321',
+                    position: 'Security Officer',
+                    property: 'Shalaheart',
+                    department: 'Security',
+                    hireDate: '2021-11-08',
+                    hourlyRate: 19.75,
+                    hoursThisWeek: 38,
+                    overtimeHours: 2,
+                    leaveDays: 0,
+                    sickDays: 0
+                },
+                {
+                    id: generateId(),
+                    name: 'Sarah Chen',
+                    email: 'sarah@example.com',
+                    phone: '+1122334455',
+                    position: 'Head Gardener',
+                    property: 'Serenity Houses',
+                    department: 'Gardening',
+                    hireDate: '2020-05-22',
+                    hourlyRate: 24.00,
+                    hoursThisWeek: 35,
+                    overtimeHours: 0,
+                    leaveDays: 1,
+                    sickDays: 0
+                }
+            ];
+            
+            // Sample tasks
+            const sampleTasks = [
+                {
+                    id: generateId(),
+                    title: 'Deep Clean Villa 3B',
+                    description: 'Thorough cleaning of villa 3B after guest checkout',
+                    assignedTo: sampleStaff[0].id,
+                    property: 'HH-Villa',
+                    priority: 'High',
+                    status: 'Completed',
+                    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    estimatedHours: 4,
+                    createdDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: generateId(),
+                    title: 'Perimeter Security Check',
+                    description: 'Complete evening perimeter check of all resort buildings',
+                    assignedTo: sampleStaff[1].id,
+                    property: 'Shalaheart',
+                    priority: 'Medium',
+                    status: 'In Progress',
+                    dueDate: new Date().toISOString().split('T')[0],
+                    estimatedHours: 2,
+                    createdDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: generateId(),
+                    title: 'Prune Rose Bushes',
+                    description: 'Prune and maintain rose bushes in main garden area',
+                    assignedTo: sampleStaff[2].id,
+                    property: 'Serenity Houses',
+                    priority: 'Low',
+                    status: 'Pending',
+                    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    estimatedHours: 3,
+                    createdDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+            
+            // Sample bookings
+            const sampleBookings = [
+                {
+                    id: generateId(),
+                    property: 'HH-Villa',
+                    guestName: 'John Smith',
+                    guestContact: 'john.smith@example.com',
+                    checkIn: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    checkOut: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    source: 'Airbnb',
+                    paymentStatus: 'Paid',
+                    amount: '1200',
+                    notes: 'Early check-in requested'
+                },
+                {
+                    id: generateId(),
+                    property: 'Shalaheart',
+                    guestName: 'Emily Johnson',
+                    guestContact: '555-1234',
+                    checkIn: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    checkOut: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    source: 'Booking.com',
+                    paymentStatus: 'Deposit',
+                    amount: '800',
+                    notes: ''
+                },
+                {
+                    id: generateId(),
+                    property: 'Serenity Houses',
+                    guestName: 'Michael Brown',
+                    guestContact: 'michael@example.com',
+                    checkIn: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    checkOut: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    source: 'Website',
+                    paymentStatus: 'Pending',
+                    amount: '1500',
+                    notes: 'Honeymoon couple'
+                },
+                {
+                    id: generateId(),
+                    property: 'Pink House',
+                    guestName: 'Sarah Davis',
+                    guestContact: '555-5678',
+                    checkIn: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    checkOut: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    source: 'Direct',
+                    paymentStatus: 'Paid',
+                    amount: '600',
+                    notes: 'Returning customer'
+                }
+            ];
+            
+            staffMembers = sampleStaff;
+            tasks = sampleTasks;
+            bookings = sampleBookings;
+            saveData();
+        }
+    </script>
+</body>
+</html>
